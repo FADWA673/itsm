@@ -1,0 +1,2 @@
+Prisma manages its migrations automatically in `prisma/migrations/` via `npx prisma migrate dev`.
+This folder is reserved for any manual SQL scripts outside of Prisma's migration system, if needed in the future.
