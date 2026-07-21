@@ -44,3 +44,34 @@ modules/ticket/
 ├── ticket.repository.ts
 └── ticket.routes.ts
 ```
+## Commit message convention (Conventional Commits)
+
+Format: `<type>(<scope>): <description>`
+
+Types allowed: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+
+Examples:
+- `feat(backend): add ticket creation endpoint`
+- `fix(frontend): correct login form validation`
+- `chore: update dependencies`
+
+Enforced automatically via Commitlint + Husky `commit-msg` hook.
+
+## Pre-commit checks
+
+Husky runs ESLint on `backend/` and `frontend/` before every commit.
+A commit is blocked if linting fails — fix the reported issues and commit again.
+
+## Branch naming
+
+Format: `feature/SCRUM-XXX-short-description`
+
+Examples:
+- `feature/SCRUM-30-dev-standards`
+- `fix/SCRUM-45-login-bug`
+
+## Environment variables standards
+
+- Never commit `.env` files — only `.env.example` (with placeholder values) is tracked in Git.
+- Each package (`backend/`, `frontend/`, `database/`) has its own `.env.example` documenting required variables.
+- Development and production use separate `.env` files (never shared or committed).

@@ -1,0 +1,4 @@
+echo "Running pre-commit checks..."
+
+cd backend && npx eslint src && cd ..
+cd frontend && npx eslint src && cd ..
