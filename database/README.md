@@ -1,21 +1,10 @@
 # ITSM Database
 
-MySQL 8.x + Prisma ORM.
+This folder holds database-related resources outside of Prisma (Prisma now lives in `backend/prisma/`).
 
-## Setup
+- `schema/` — raw SQL schema references or exports
+- `migrations/` — manual SQL migration scripts (if needed outside Prisma Migrate)
+- `seeders/` — data seeding scripts
+- `scripts/` — database utility scripts (backup, reset, etc.)
 
-1. Copy `.env.example` to `.env` and fill in your MySQL credentials.
-2. Start MySQL: `docker compose up -d mysql` (from project root).
-3. Run:
-   \`\`\`
-   npm install
-   npx prisma generate
-   \`\`\`
-
-## Migrations
-
-\`\`\`
-npx prisma migrate dev --name init
-\`\`\`
-
-Business models (User, Ticket, Asset, etc.) are out of scope for this initial setup and will be added in future tickets.
+Prisma schema, client generation, and migrations are managed in `backend/prisma/`.
