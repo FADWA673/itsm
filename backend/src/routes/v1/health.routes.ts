@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { prisma } from "../../config/database";
+import { isDatabaseHealthy } from "../../config/database";
 import { ApiResponse } from "../../types/api.types";
 import { logger } from "../../utils/logger";
 
@@ -22,7 +22,12 @@ router.get("/", async (_req: Request, res: Response) => {
   let dbError: string | undefined;
 
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    const healthy = await isDatabaseHealthy();
+    if (!healthy) {
+      dbStatus = "ERROR";
+      dbError = "Database ping failed";
+      logger.error(`Health check — database unreachable`);
+    }
   } catch (error) {
     dbStatus = "ERROR";
     dbError = error instanceof Error ? error.message : "Unknown database error";
