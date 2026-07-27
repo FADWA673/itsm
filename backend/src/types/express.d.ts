@@ -1,7 +1,7 @@
 /**
  * Extension du type Request d'Express.
- * Permet d'attacher l'utilisateur authentifié à chaque requête après le middleware auth.
- * Le type JwtPayload sera défini dans le module auth (ITSM-003).
+ * Permet d'attacher l'utilisateur authentifié à chaque requête
+ * après le middleware `authenticate`.
  */
 declare global {
   namespace Express {
@@ -10,6 +10,7 @@ declare global {
         id: string;
         email: string;
         role: string;
+        organizationId: string;
       };
     }
   }
