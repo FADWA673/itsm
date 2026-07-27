@@ -3,7 +3,6 @@
     "target": "ES2022",
     "module": "Node16",
     "moduleResolution": "node16",
-    "rootDir": "src",
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
@@ -12,6 +11,6 @@
     "resolveJsonModule": true,
     "sourceMap": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "prisma/**/*"],
   "exclude": ["node_modules", "dist", "tests"]
 }
