@@ -1,18 +1,22 @@
-version: "3.9"
+version: '3.9'
 
 services:
-  mysql:
+  db:
     image: mysql:8.0
+    container_name: itsm-db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_NAME:-itsm_db}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-      MYSQL_USER: ${DB_USER:-user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "${DB_PORT:-3307}:3306"
+      - "${DB_PORT:-3306}:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - itsm-network
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -22,24 +26,43 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: ../docker/backend/Dockerfile
+      dockerfile: Dockerfile
+    container_name: itsm-backend
     restart: unless-stopped
-    env_file: .env
+    env_file:
+      - ./backend/.env
     ports:
-      - "${PORT:-3000}:3000"
+      - "${BACKEND_PORT:-3000}:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     depends_on:
-      mysql:
+      db:
         condition: service_healthy
+    networks:
+      - itsm-network
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: ../docker/frontend/Dockerfile
+      dockerfile: Dockerfile
+    container_name: itsm-frontend
     restart: unless-stopped
+    env_file:
+      - ./frontend/.env
     ports:
-      - "80:80"
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
+    networks:
+      - itsm-network
 
 volumes:
-  mysql_data:
+  db_data:
+
+networks:
+  itsm-network:
+    driver: bridge
