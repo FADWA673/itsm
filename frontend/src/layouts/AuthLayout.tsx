@@ -28,9 +28,9 @@ function AuthLayout() {
       {/* Logo */}
       <Typography
         variant="h4"
-        fontWeight={700}
         color="primary"
         mb={4}
+        sx={{ fontWeight: 700 }}
       >
         ITSM Platform
       </Typography>
