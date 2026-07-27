@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../utils/jwt";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
+import { logAudit, auditAccessDenied } from "../utils/audit";
 
 // =============================================================================
 // Middleware d'authentification
@@ -20,10 +21,16 @@ export const authenticate = asyncHandler(
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      logAudit({
+        action: "AUTH_TOKEN_INVALID",
+        ip: req.ip,
+        details: { reason: "Missing or malformed Authorization header" },
+        success: false,
+      });
       throw new ApiError(401, "Authentication required");
     }
 
-    const token = authHeader.substring(7); // Retire "Bearer "
+    const token = authHeader.substring(7);
 
     const payload = verifyAccessToken(token);
 
@@ -56,11 +63,15 @@ export function authorize(...allowedRoles: string[]) {
     }
 
     const userRole = req.user.role.toLowerCase();
-    const hasRole = allowedRoles
-      .map((r) => r.toLowerCase())
-      .includes(userRole);
+    const hasRole = allowedRoles.map((r) => r.toLowerCase()).includes(userRole);
 
     if (!hasRole) {
+      auditAccessDenied(
+        req.user.id,
+        req.originalUrl,
+        allowedRoles.join(", "),
+        req.ip
+      );
       throw new ApiError(
         403,
         `Access denied. Required roles: ${allowedRoles.join(", ")}`
