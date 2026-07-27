@@ -3,12 +3,15 @@ import { config } from "../config";
 
 const { combine, timestamp, colorize, printf, json } = winston.format;
 
-const consoleFormat = printf(({ level, message, timestamp }) => {
-  return `${timestamp} [${level}]: ${message}`;
-});
+const consoleFormat = printf(
+  ({ level, message, timestamp: ts }: winston.Logform.TransformableInfo) => {
+    return `${String(ts)} [${level}]: ${String(message)}`;
+  }
+);
 
 export const logger = winston.createLogger({
   level: config.log.level,
+  levels: { ...winston.config.npm.levels, http: 5 },
   transports: [
     new winston.transports.Console({
       format: combine(
