@@ -5,27 +5,41 @@ services:
     image: mysql:8.0
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: itsm
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${DB_NAME:-itsm_db}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_USER: ${DB_USER:-user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
     ports:
-      - "3307:3306"
+      - "${DB_PORT:-3307}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
-    build: ./backend/ITSM.API
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend/Dockerfile
     restart: unless-stopped
     env_file: .env
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend/Dockerfile
     restart: unless-stopped
     ports:
-      - "5173:5173"
+      - "80:80"
+    depends_on:
+      - backend
 
 volumes:
   mysql_data:
