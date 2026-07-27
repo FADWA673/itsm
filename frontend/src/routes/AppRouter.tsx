@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { PATHS } from "./paths";
 import ProtectedRoute from "./ProtectedRoute";
+import PageLoader from "../components/ui/PageLoader";
 
 // ─── Lazy loading des pages ────────────────────────────────────────────────────
 // Chaque page est chargée uniquement quand elle est visitée (performance)
@@ -13,24 +14,6 @@ const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 // Pages protégées
 const DashboardPage = lazy(() => import("../pages/DashboardPage"));
-
-// ─── Fallback de chargement ───────────────────────────────────────────────────
-function PageLoader() {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        fontSize: "16px",
-        color: "#6b6375",
-      }}
-    >
-      Chargement...
-    </div>
-  );
-}
 
 /**
  * Configuration centralisée de toutes les routes de l'application.
