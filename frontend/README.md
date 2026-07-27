@@ -1,75 +1,79 @@
-# React + TypeScript + Vite
+# Frontend — ITSM Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface utilisateur construite avec React 19 et Vite. Permet la gestion des tickets, le suivi des incidents et l'accès aux fonctionnalités ITSM.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Outil | Version | Rôle |
+|---|---|---|
+| React | 19 | Framework UI |
+| Vite | 8 | Bundler / serveur de dev |
+| TypeScript | 6 | Langage |
+| React Router | 7 | Routage client |
+| Axios | — | Appels API HTTP |
 
-## React Compiler
+## Démarrage
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+# Installer les dépendances
+npm install
 
-## Expanding the ESLint configuration
+# Démarrer en développement
+npm run dev
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Compiler pour la production
+npm run build
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Prévisualiser le build de production
+npm run preview
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+# Lancer le linter
+npm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts npm
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Script | Commande | Description |
+|---|---|---|
+| `dev` | `vite` | Serveur de développement (port 5173) |
+| `build` | `tsc -b && vite build` | Compilation TypeScript + build Vite → `dist/` |
+| `preview` | `vite preview` | Prévisualisation du build production |
+| `lint` | `eslint .` | Vérification du code |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Variables d'environnement
+
+Copier `.env.example` vers `.env` et remplir les valeurs.
+
+> Toutes les variables doivent être préfixées par `VITE_` pour être accessibles dans le code React.
+
+| Variable | Valeur par défaut | Description |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:3000/api/v1` | URL de l'API backend |
+| `VITE_APP_NAME` | `ITSM Platform` | Nom de l'application |
+| `VITE_ENABLE_AI` | `false` | Activer le module IA |
+| `VITE_ENABLE_WHATSAPP` | `false` | Activer l'intégration WhatsApp |
+| `VITE_ENABLE_NOTIFICATIONS` | `true` | Activer les notifications |
+
+## Structure `src/`
 
 ```
+src/
+├── main.tsx          # Point d'entrée React
+├── App.tsx           # Composant racine et routage
+├── assets/           # Images, icônes, fonts
+├── components/       # Composants UI réutilisables
+├── features/         # Modules fonctionnels (tickets, users...)
+├── hooks/            # Custom React hooks
+├── layouts/          # Layouts de pages
+├── pages/            # Vues associées aux routes
+├── services/         # Appels API (axios)
+├── store/            # État global
+├── styles/           # CSS global
+├── types/            # Types TypeScript partagés
+└── utils/            # Fonctions utilitaires
+```
+
+## Accès en développement
+
+- **Local** : http://localhost:5173
+- **Via Docker** : http://localhost:5173
