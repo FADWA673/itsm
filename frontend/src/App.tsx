@@ -1,16 +1,11 @@
-import { Routes, Route } from "react-router-dom";
-import "./styles/App.css";
+import AppRouter from "./routes/AppRouter";
 
-function Home() {
-  return <h1>ITSM Platform — Home</h1>;
-}
-
+/**
+ * Composant racine de l'application.
+ * Délègue tout le routing à AppRouter.
+ */
 function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-    </Routes>
-  );
+  return <AppRouter />;
 }
 
 export default App;
