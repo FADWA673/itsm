@@ -3,41 +3,53 @@ import { Routes, Route } from "react-router-dom";
 import { PATHS } from "./paths";
 import ProtectedRoute from "./ProtectedRoute";
 import PageLoader from "../components/ui/PageLoader";
+import MainLayout from "../layouts/MainLayout";
+import AuthLayout from "../layouts/AuthLayout";
 
 // ─── Lazy loading des pages ────────────────────────────────────────────────────
-// Chaque page est chargée uniquement quand elle est visitée (performance)
 
 // Pages publiques
 const HomePage = lazy(() => import("../pages/HomePage"));
-const LoginPage = lazy(() => import("../pages/LoginPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
-// Pages protégées
+// Pages auth (dans AuthLayout)
+const LoginPage = lazy(() => import("../pages/LoginPage"));
+
+// Pages protégées (dans MainLayout)
 const DashboardPage = lazy(() => import("../pages/DashboardPage"));
 
 /**
  * Configuration centralisée de toutes les routes de l'application.
  *
  * Structure :
- * - Routes publiques : accessibles sans authentification
- * - Routes protégées : enveloppées dans <ProtectedRoute>
- *   → redirigent vers /login si non authentifié
+ * - / → HomePage (publique, sans layout)
+ * - /login → AuthLayout → LoginPage
+ * - /dashboard, /tickets, ... → ProtectedRoute → MainLayout → Page
+ * - * → NotFoundPage
  *
- * Futurs modules à ajouter ici (ITSM-004+) :
+ * Pour ajouter un futur module (ITSM-004+) :
  *   const TicketsPage = lazy(() => import("../pages/TicketsPage"))
  *   <Route path={PATHS.TICKETS} element={<TicketsPage />} />
+ *   (à l'intérieur du bloc ProtectedRoute → MainLayout)
  */
 function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* ── Routes publiques ─────────────────────────────────────────────── */}
+        {/* ── Page d'accueil publique ───────────────────────────────────────── */}
         <Route path={PATHS.HOME} element={<HomePage />} />
-        <Route path={PATHS.LOGIN} element={<LoginPage />} />
 
-        {/* ── Routes protégées ─────────────────────────────────────────────── */}
+        {/* ── Pages auth — AuthLayout ───────────────────────────────────────── */}
+        <Route element={<AuthLayout />}>
+          <Route path={PATHS.LOGIN} element={<LoginPage />} />
+        </Route>
+
+        {/* ── Pages protégées — MainLayout ─────────────────────────────────── */}
         <Route element={<ProtectedRoute />}>
-          <Route path={PATHS.DASHBOARD} element={<DashboardPage />} />
+          <Route element={<MainLayout />}>
+            <Route path={PATHS.DASHBOARD} element={<DashboardPage />} />
+            {/* Futurs modules ajoutés ici */}
+          </Route>
         </Route>
 
         {/* ── 404 ──────────────────────────────────────────────────────────── */}

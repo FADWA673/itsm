@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { getTheme } from "./styles/theme";
 import { useThemeStore } from "./store/useThemeStore";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
+import NotificationToast from "./components/layout/NotificationToast";
 import App from "./App";
 
 /**
@@ -20,6 +21,7 @@ function ThemedApp() {
       <ErrorBoundary>
         <BrowserRouter>
           <App />
+          <NotificationToast />
         </BrowserRouter>
       </ErrorBoundary>
     </ThemeProvider>
