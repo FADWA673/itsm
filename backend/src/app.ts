@@ -32,7 +32,7 @@ export function createApp() {
   const morganFormat = config.nodeEnv === "production" ? "combined" : "dev";
   app.use(
     morgan(morganFormat, {
-      stream: { write: (message) => logger.http(message.trim()) },
+      stream: { write: (message: string) => logger.http(message.trim()) },
     })
   );
 
