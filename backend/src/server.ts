@@ -1,10 +1,12 @@
 import "dotenv/config";
 import { createApp } from "./app";
-import { config } from "./config";
+import { config, validateEnv } from "./config";
 import { logger } from "./utils/logger";
 import { connectDatabase, registerShutdownHandlers } from "./config/database";
 
 async function bootstrap() {
+  // ── 0. Validation des variables d'environnement ────────────────────────────
+  validateEnv();
   // ── 1. Connexion à la base de données ──────────────────────────────────────
   try {
     await connectDatabase();

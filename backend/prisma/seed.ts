@@ -1,17 +1,10 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PrismaClient } = require("@prisma/client");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 
 const prisma = new PrismaClient();
-
-/**
- * Hash simple pour le mot de passe de seed (dev uniquement).
- * En production, utiliser bcrypt (ITSM-005 Authentication).
- */
-function hashPassword(password: string): string {
-  return crypto.createHash("sha256").update(password).digest("hex");
-}
+const SALT_ROUNDS = 12;
 
 async function seedOrganization() {
   const org = await prisma.organization.upsert({
@@ -24,18 +17,18 @@ async function seedOrganization() {
       status: "ACTIVE",
     },
   });
-
   console.log(`✅ Organization seeded: ${org.name} (${org.id})`);
   return org;
 }
 
 async function seedAdminUser(organizationId: string) {
+  const hash = await bcrypt.hash("Admin@1234", SALT_ROUNDS);
   const admin = await prisma.user.upsert({
     where: { email: "admin@logismar.com" },
     update: {},
     create: {
       email: "admin@logismar.com",
-      passwordHash: hashPassword("Admin@1234"),
+      passwordHash: hash,
       firstName: "Admin",
       lastName: "ITSM",
       role: "SUPER_ADMIN",
@@ -43,18 +36,18 @@ async function seedAdminUser(organizationId: string) {
       organizationId,
     },
   });
-
-  console.log(`✅ Admin user seeded: ${admin.email} (${admin.id})`);
+  console.log(`✅ Admin user seeded: ${admin.email}`);
   return admin;
 }
 
 async function seedDemoUser(organizationId: string) {
+  const hash = await bcrypt.hash("User@1234", SALT_ROUNDS);
   const user = await prisma.user.upsert({
     where: { email: "user@logismar.com" },
     update: {},
     create: {
       email: "user@logismar.com",
-      passwordHash: hashPassword("User@1234"),
+      passwordHash: hash,
       firstName: "Demo",
       lastName: "User",
       role: "USER",
@@ -62,18 +55,15 @@ async function seedDemoUser(organizationId: string) {
       organizationId,
     },
   });
-
-  console.log(`✅ Demo user seeded: ${user.email} (${user.id})`);
+  console.log(`✅ Demo user seeded: ${user.email}`);
   return user;
 }
 
 async function main() {
   console.log("🌱 Starting database seed...\n");
-
   const organization = await seedOrganization();
   await seedAdminUser(organization.id);
   await seedDemoUser(organization.id);
-
   console.log("\n✅ Database seeded successfully.");
   console.log("\n📋 Default credentials (development only):");
   console.log("   Admin : admin@logismar.com / Admin@1234");
