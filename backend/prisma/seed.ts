@@ -1,11 +1,9 @@
-import { PrismaClient, UserRole, UserStatus, OrganizationStatus } from "@prisma/client";
-import crypto from "crypto";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { PrismaClient } = require("@prisma/client");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const crypto = require("crypto");
 
 const prisma = new PrismaClient();
-
-// =============================================================================
-// Helpers
-// =============================================================================
 
 /**
  * Hash simple pour le mot de passe de seed (dev uniquement).
@@ -15,10 +13,6 @@ function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex");
 }
 
-// =============================================================================
-// Seeds
-// =============================================================================
-
 async function seedOrganization() {
   const org = await prisma.organization.upsert({
     where: { slug: "logismar" },
@@ -27,7 +21,7 @@ async function seedOrganization() {
       name: "Logismar",
       slug: "logismar",
       domain: "logismar.com",
-      status: OrganizationStatus.ACTIVE,
+      status: "ACTIVE",
     },
   });
 
@@ -44,8 +38,8 @@ async function seedAdminUser(organizationId: string) {
       passwordHash: hashPassword("Admin@1234"),
       firstName: "Admin",
       lastName: "ITSM",
-      role: UserRole.SUPER_ADMIN,
-      status: UserStatus.ACTIVE,
+      role: "SUPER_ADMIN",
+      status: "ACTIVE",
       organizationId,
     },
   });
@@ -63,8 +57,8 @@ async function seedDemoUser(organizationId: string) {
       passwordHash: hashPassword("User@1234"),
       firstName: "Demo",
       lastName: "User",
-      role: UserRole.USER,
-      status: UserStatus.ACTIVE,
+      role: "USER",
+      status: "ACTIVE",
       organizationId,
     },
   });
@@ -72,10 +66,6 @@ async function seedDemoUser(organizationId: string) {
   console.log(`✅ Demo user seeded: ${user.email} (${user.id})`);
   return user;
 }
-
-// =============================================================================
-// Main
-// =============================================================================
 
 async function main() {
   console.log("🌱 Starting database seed...\n");
@@ -91,7 +81,7 @@ async function main() {
 }
 
 main()
-  .catch((error) => {
+  .catch((error: Error) => {
     console.error("❌ Seed failed:", error);
     process.exit(1);
   })

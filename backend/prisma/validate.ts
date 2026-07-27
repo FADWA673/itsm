@@ -1,10 +1,5 @@
-/**
- * Script de validation de l'environnement base de données.
- * Vérifie : connexion, CRUD, migrations, données de seed.
- *
- * Usage : npm run db:validate
- */
-import { PrismaClient } from "@prisma/client";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
@@ -48,7 +43,6 @@ async function validateSeedData() {
 async function validateCRUD() {
   console.log("4️⃣  Validating CRUD operations...");
 
-  // Create
   const testOrg = await prisma.organization.create({
     data: {
       name: "Test Organization",
@@ -57,19 +51,16 @@ async function validateCRUD() {
     },
   });
 
-  // Read
   const found = await prisma.organization.findUnique({
     where: { id: testOrg.id },
   });
   if (!found) throw new Error("Read failed");
 
-  // Update
   await prisma.organization.update({
     where: { id: testOrg.id },
     data: { name: "Test Organization Updated" },
   });
 
-  // Delete
   await prisma.organization.delete({ where: { id: testOrg.id } });
 
   console.log("   ✅ CRUD OK — create, read, update, delete all working");
@@ -83,7 +74,6 @@ async function main() {
     await validateSchema();
     await validateSeedData();
     await validateCRUD();
-
     console.log("\n✅ Database environment is fully operational.\n");
   } catch (error) {
     console.error("\n❌ Validation failed:", error);
