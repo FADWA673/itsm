@@ -11,7 +11,8 @@ RUN npm install
 
 COPY . .
 
-# Note: prisma generate sera ajouté ici quand les modèles seront définis dans schema.prisma
+# Generate Prisma Client
+RUN npx prisma generate
 
 EXPOSE 3000
 
