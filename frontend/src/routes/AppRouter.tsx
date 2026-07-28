@@ -14,6 +14,8 @@ const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 // Pages auth (dans AuthLayout)
 const LoginPage = lazy(() => import("../pages/LoginPage"));
+const ForgotPasswordPage = lazy(() => import("../pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("../pages/ResetPasswordPage"));
 
 // Pages protégées (dans MainLayout)
 const DashboardPage = lazy(() => import("../pages/DashboardPage"));
@@ -42,6 +44,8 @@ function AppRouter() {
         {/* ── Pages auth — AuthLayout ───────────────────────────────────────── */}
         <Route element={<AuthLayout />}>
           <Route path={PATHS.LOGIN} element={<LoginPage />} />
+          <Route path={PATHS.FORGOT_PASSWORD} element={<ForgotPasswordPage />} />
+          <Route path={PATHS.RESET_PASSWORD} element={<ResetPasswordPage />} />
         </Route>
 
         {/* ── Pages protégées — MainLayout ─────────────────────────────────── */}
