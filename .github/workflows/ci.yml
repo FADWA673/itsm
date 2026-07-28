@@ -1,0 +1,85 @@
+# =============================================================================
+# CI Pipeline — ITSM Platform
+# ITSM-006-5 : Configure GitHub Actions
+# ITSM-006-6 : Configure CI Pipeline
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  # ===========================================================================
+  # Job 1 — Backend : lint + TypeScript compile
+  # ===========================================================================
+  backend:
+    name: Backend — Lint & Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run ESLint
+        run: npx eslint src/
+
+      - name: TypeScript compile check
+        run: npx tsc --noEmit
+
+  # ===========================================================================
+  # Job 2 — Frontend : lint + TypeScript compile + build
+  # npm install instead of npm ci — avoids transitive lock file sync issues
+  # ===========================================================================
+  frontend:
+    name: Frontend — Lint & Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npx eslint src/
+
+      - name: TypeScript compile check
+        run: npx tsc --noEmit
+
+      - name: Build check
+        run: npm run build

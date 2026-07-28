@@ -15,10 +15,6 @@ interface HeaderProps {
   drawerWidth: number;
 }
 
-/**
- * Barre de navigation supérieure.
- * Contient : bouton menu mobile, titre, toggle dark mode, avatar utilisateur.
- */
 function Header({ onMenuToggle, drawerWidth }: HeaderProps) {
   const { mode, toggleMode } = useThemeStore();
   const { user } = useAuthStore();
@@ -37,7 +33,6 @@ function Header({ onMenuToggle, drawerWidth }: HeaderProps) {
       }}
     >
       <Toolbar>
-        {/* Bouton menu — visible uniquement sur mobile */}
         <IconButton
           color="inherit"
           edge="start"
@@ -47,20 +42,17 @@ function Header({ onMenuToggle, drawerWidth }: HeaderProps) {
           <MenuIcon />
         </IconButton>
 
-        {/* Titre */}
-        <Typography variant="h6" fontWeight={600} sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
           ITSM Platform
         </Typography>
 
-        <Box display="flex" alignItems="center" gap={1}>
-          {/* Toggle dark / light mode */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Tooltip title={mode === "dark" ? "Mode clair" : "Mode sombre"}>
             <IconButton onClick={toggleMode} color="inherit">
               {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
             </IconButton>
           </Tooltip>
 
-          {/* Avatar utilisateur */}
           <Tooltip title={user ? `${user.firstName} ${user.lastName}` : ""}>
             <Avatar
               sx={{

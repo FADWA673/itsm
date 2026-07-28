@@ -8,20 +8,21 @@ interface PageLoaderProps {
 
 /**
  * Spinner de chargement centré sur toute la page.
- * Utilisé dans Suspense fallback pour le lazy loading des routes.
  */
 function PageLoader({ message = "Chargement..." }: PageLoaderProps) {
   return (
     <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-      gap={2}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        gap: 2,
+      }}
     >
       <CircularProgress color="primary" size={48} />
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
         {message}
       </Typography>
     </Box>
