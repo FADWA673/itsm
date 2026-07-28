@@ -1,5 +1,4 @@
 import "dotenv/config";
-import { logger } from "../utils/logger";
 
 interface Config {
   port: number;
@@ -74,10 +73,10 @@ export function validateEnv(): void {
   const message = `Missing required environment variables: ${missing.join(", ")}`;
 
   if (config.nodeEnv === "production") {
-    logger.error(message);
+    console.error(`[CONFIG] ${message}`);
     process.exit(1);
   } else {
-    logger.warn(`⚠️  ${message}`);
-    logger.warn("Set these variables in backend/.env before using auth features.");
+    console.warn(`[CONFIG] ⚠️  ${message}`);
+    console.warn("[CONFIG] Set these variables in backend/.env before using auth features.");
   }
 }
