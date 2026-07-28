@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import rateLimit from "express-rate-limit";
 
 import { config } from "./config";
 import { logger } from "./utils/logger";
@@ -12,8 +13,26 @@ import { errorHandler } from "./middlewares/error.middleware";
 export function createApp() {
   const app = express();
 
-  // ─── Sécurité ────────────────────────────────────────────────────────────────
-  app.use(helmet());
+  // ─── Sécurité — Helmet ───────────────────────────────────────────────────────
+  app.use(
+    helmet({
+      contentSecurityPolicy: config.nodeEnv === "production",
+      crossOriginEmbedderPolicy: config.nodeEnv === "production",
+    })
+  );
+
+  // ─── Rate Limiting global ────────────────────────────────────────────────────
+  const limiter = rateLimit({
+    windowMs: config.rateLimit.windowMs,
+    max: config.rateLimit.max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+      success: false,
+      message: "Too many requests, please try again later.",
+    },
+  });
+  app.use("/api", limiter);
 
   // ─── CORS ────────────────────────────────────────────────────────────────────
   app.use(
@@ -21,12 +40,13 @@ export function createApp() {
       origin: config.cors.origin,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
     })
   );
 
   // ─── Parsing ─────────────────────────────────────────────────────────────────
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
   // ─── HTTP Logging ─────────────────────────────────────────────────────────────
   const morganFormat = config.nodeEnv === "production" ? "combined" : "dev";

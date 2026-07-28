@@ -1,4 +1,4 @@
-import { Component, ReactNode } from "react";
+import { type ReactNode, Component } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -14,12 +14,6 @@ interface State {
 
 /**
  * Error Boundary React — capture les erreurs dans l'arbre de composants.
- * Affiche un message propre au lieu de crasher toute l'application.
- *
- * Usage :
- *   <ErrorBoundary>
- *     <MonComposant />
- *   </ErrorBoundary>
  */
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
@@ -40,19 +34,21 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <Box
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="100vh"
-          gap={2}
-          p={4}
-          textAlign="center"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "100vh",
+            gap: 2,
+            p: 4,
+            textAlign: "center",
+          }}
         >
-          <Typography variant="h4" color="error">
+          <Typography variant="h4" sx={{ color: "error.main" }}>
             Une erreur est survenue
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" sx={{ color: "text.secondary" }}>
             {this.state.error?.message || "Erreur inattendue"}
           </Typography>
           <Button variant="contained" onClick={this.handleReset}>

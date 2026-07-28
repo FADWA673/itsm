@@ -85,11 +85,11 @@ function Sidebar({ open, onClose, drawerWidth }: SidebarProps) {
       }}
     >
       {/* Logo / Nom de l'app */}
-      <Box px={3} pb={2}>
-        <Typography variant="h6" fontWeight={700} color="primary">
+      <Box sx={{ px: 3, pb: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: "primary.main" }}>
           ITSM
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{ color: "text.secondary" }}>
           IT Service Management
         </Typography>
       </Box>
@@ -120,7 +120,7 @@ function Sidebar({ open, onClose, drawerWidth }: SidebarProps) {
               <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
               <ListItemText
                 primary={item.label}
-                primaryTypographyProps={{ fontWeight: isActive ? 600 : 400 }}
+                slotProps={{ primary: { style: { fontWeight: isActive ? 600 : 400 } } }}
               />
             </ListItemButton>
           );
