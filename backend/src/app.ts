@@ -35,9 +35,16 @@ export function createApp() {
   app.use("/api", limiter);
 
   // ─── CORS ────────────────────────────────────────────────────────────────────
+  const allowedOrigins = config.cors.origin.split(",").map((o) => o.trim());
   app.use(
     cors({
-      origin: config.cors.origin,
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS: origin ${origin} not allowed`));
+        }
+      },
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization"],
       credentials: true,
