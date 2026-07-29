@@ -24,10 +24,10 @@ async function seedOrganization() {
 async function seedAdminUser(organizationId: string) {
   const hash = await bcrypt.hash("Admin@1234", SALT_ROUNDS);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@logismar.com" },
+    where: { email: "fadwazr12@gmail.com" },
     update: {},
     create: {
-      email: "admin@logismar.com",
+      email: "fadwazr12@gmail.com",
       passwordHash: hash,
       firstName: "Admin",
       lastName: "ITSM",
