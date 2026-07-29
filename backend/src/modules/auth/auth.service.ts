@@ -3,6 +3,7 @@ import { comparePassword, hashPassword, isPasswordStrong } from "../../utils/pas
 import { generateTokenPair, verifyRefreshToken, verifyAccessToken } from "../../utils/jwt";
 import { ApiError } from "../../utils/ApiError";
 import { auditAuthSuccess, auditAuthFailure } from "../../utils/audit";
+import { sendPasswordResetEmail } from "../../utils/email";
 import type { LoginResponse } from "./auth.types";
 
 export class AuthService {
@@ -109,13 +110,12 @@ export class AuthService {
     // Toujours retourner succès pour ne pas révéler si l'email existe
     if (!user || user.deletedAt) return;
 
-    // Générer un token de reset (valide 1h)
+    // Générer un token de reset (valide 7j — même durée que access token)
     const payload = { sub: user.id, email: user.email, role: "reset", organizationId: user.organizationId };
     const { accessToken: resetToken } = generateTokenPair(payload);
 
-    // TODO (ITSM-014): envoyer l'email avec le lien de reset
-    // Pour l'instant on log le token en dev
-    console.log(`[AUTH] Password reset token for ${email}: ${resetToken}`);
+    // Envoyer l'email de reset
+    await sendPasswordResetEmail(user.email, resetToken, user.firstName);
   }
 
   /**

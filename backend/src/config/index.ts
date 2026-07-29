@@ -22,6 +22,14 @@ interface Config {
     windowMs: number;
     max: number;
   };
+  smtp: {
+    host: string;
+    port: number;
+    secure: boolean;
+    user: string;
+    password: string;
+    from: string;
+  };
 }
 
 export const config: Config = {
@@ -45,6 +53,14 @@ export const config: Config = {
   rateLimit: {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000", 10),
     max: parseInt(process.env.RATE_LIMIT_MAX || "100", 10),
+  },
+  smtp: {
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.SMTP_PORT || "587", 10),
+    secure: process.env.SMTP_SECURE === "true",
+    user: process.env.SMTP_USER || "",
+    password: process.env.SMTP_PASSWORD || "",
+    from: process.env.SMTP_FROM || "",
   },
 };
 

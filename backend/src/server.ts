@@ -3,6 +3,7 @@ import { createApp } from "./app";
 import { config, validateEnv } from "./config";
 import { logger } from "./utils/logger";
 import { connectDatabase, registerShutdownHandlers } from "./config/database";
+import { verifyEmailConfig } from "./utils/email";
 
 async function bootstrap() {
   // ── 0. Validation des variables d'environnement ────────────────────────────
@@ -17,16 +18,19 @@ async function bootstrap() {
     process.exit(1);
   }
 
-  // ── 2. Création de l'application Express ───────────────────────────────────
+  // ── 2. Vérification SMTP ───────────────────────────────────────────────────
+  await verifyEmailConfig();
+
+  // ── 3. Création de l'application Express ───────────────────────────────────
   const app = createApp();
 
-  // ── 3. Démarrage du serveur ─────────────────────────────────────────────────
+  // ── 4. Démarrage du serveur ─────────────────────────────────────────────────
   app.listen(config.port, () => {
     logger.info(`ITSM Backend running on port ${config.port} [${config.nodeEnv}]`);
     logger.info(`Health check: http://localhost:${config.port}/api/v1/health`);
   });
 
-  // ── 4. Graceful shutdown handlers ──────────────────────────────────────────
+  // ── 5. Graceful shutdown handlers ──────────────────────────────────────────
   registerShutdownHandlers();
 }
 
