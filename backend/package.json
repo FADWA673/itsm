@@ -15,9 +15,13 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:reset": "prisma migrate reset",
     "db:push": "prisma db push",
+    "db:push:local": "dotenv -e .env.local -- prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:local": "dotenv -e .env.local -- tsx prisma/seed.ts",
     "db:validate": "tsx prisma/validate.ts",
-    "db:studio": "prisma studio"
+    "db:validate:local": "dotenv -e .env.local -- tsx prisma/validate.ts",
+    "db:studio": "prisma studio",
+    "db:studio:local": "dotenv -e .env.local -- prisma studio"
   },
   "keywords": [],
   "author": "",
@@ -48,6 +52,7 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^26.1.1",
     "@types/nodemailer": "^8.0.1",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^10.7.0",
     "prettier": "^3.9.5",
     "prisma": "5.20",
