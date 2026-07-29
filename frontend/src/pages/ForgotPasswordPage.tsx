@@ -8,6 +8,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import Alert from "@mui/material/Alert";
 import { PATHS } from "../routes/paths";
+import { forgotPasswordApi } from "../services/auth.service";
 
 function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -17,11 +18,14 @@ function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // TODO (ITSM-008): appel API forgot-password
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await forgotPasswordApi(email);
       setSent(true);
-    }, 1000);
+    } catch {
+      setSent(true); // Toujours afficher succès pour ne pas révéler si email existe
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
