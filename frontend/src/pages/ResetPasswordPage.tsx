@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import { PATHS } from "../routes/paths";
+import { resetPasswordApi } from "../services/auth.service";
 
 function ResetPasswordPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token") || "";
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,11 +32,17 @@ function ResetPasswordPage() {
     }
 
     setLoading(true);
-    // TODO (ITSM-008): appel API reset-password avec token URL
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await resetPasswordApi(token, newPassword);
       navigate(PATHS.LOGIN);
-    }, 1000);
+    } catch (err) {
+      const message = err && typeof err === "object" && "message" in err
+        ? String((err as { message: string }).message)
+        : "Reset failed. Please try again.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
