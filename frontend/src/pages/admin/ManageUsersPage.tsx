@@ -122,7 +122,7 @@ function ManageUsersPage() {
     if (!editForm.firstName || !editForm.lastName) { setEditError("First name and last name are required"); return; }
     setEditSubmitting(true);
     try {
-      const updated = await updateUser(editTarget.id, { firstName: editForm.firstName, lastName: editForm.lastName, role: editForm.role });
+      const updated = await updateUser(editTarget.id, { firstName: editForm.firstName, lastName: editForm.lastName, role: editForm.role, status: editForm.status });
       setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
       setEditOpen(false);
       addNotification(`User ${updated.email} updated`, "success");

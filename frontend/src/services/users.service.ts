@@ -18,6 +18,7 @@ export interface CreateUserDTO {
   firstName: string;
   lastName: string;
   role: string;
+  status?: string;
 }
 
 export const getUsers = () => get<UserDTO[]>("/users");
