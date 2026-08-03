@@ -22,6 +22,18 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json({ success: true, message: "User created successfully", data: user });
 });
 
+export const updateUser = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params["id"] as string;
+  const user = await usersService.update(id, req.body as Partial<{ firstName: string; lastName: string; role: string; status: string }>);
+  res.json({ success: true, message: "User updated", data: user });
+});
+
+export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params["id"] as string;
+  await usersService.delete(id);
+  res.json({ success: true, message: "User deleted" });
+});
+
 export const deactivateUser = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params["id"] as string;
   const user = await usersService.deactivate(id);
