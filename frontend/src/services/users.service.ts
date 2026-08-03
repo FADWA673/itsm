@@ -1,4 +1,4 @@
-import { get, post, patch } from "./api";
+import { get, post, put, patch, del } from "./api";
 
 export interface UserDTO {
   id: string;
@@ -22,4 +22,6 @@ export interface CreateUserDTO {
 
 export const getUsers = () => get<UserDTO[]>("/users");
 export const createUser = (data: CreateUserDTO) => post<UserDTO>("/users", data);
+export const updateUser = (id: string, data: Partial<CreateUserDTO>) => put<UserDTO>(`/users/${id}`, data);
+export const deleteUser = (id: string) => del<void>(`/users/${id}`);
 export const deactivateUser = (id: string) => patch<UserDTO>(`/users/${id}/deactivate`);
