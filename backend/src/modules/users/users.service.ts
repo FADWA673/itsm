@@ -88,6 +88,14 @@ export class UsersService {
   }
 
   /**
+   * Réinitialise le mot de passe d'un utilisateur (par l'admin).
+   */
+  async resetPassword(id: string, newPassword: string): Promise<void> {
+    const passwordHash = await hashPassword(newPassword);
+    await prisma.user.update({ where: { id }, data: { passwordHash } });
+  }
+
+  /**
    * Supprime définitivement un utilisateur.
    */
   async delete(id: string): Promise<void> {

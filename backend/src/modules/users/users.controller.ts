@@ -28,6 +28,16 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, message: "User updated", data: user });
 });
 
+export const resetUserPassword = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params["id"] as string;
+  const { password } = req.body as { password: string };
+  if (!password || password.length < 8) {
+    throw new ApiError(400, "Password must be at least 8 characters");
+  }
+  await usersService.resetPassword(id, password);
+  res.json({ success: true, message: "Password reset successfully" });
+});
+
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params["id"] as string;
   await usersService.delete(id);
