@@ -113,23 +113,6 @@ function HomePage() {
             </Button>
           </Box>
 
-          {/* Stats */}
-          <Box sx={{ display: "flex", gap: 4, mt: 5 }}>
-            {[
-              { value: "5", label: "Rôles utilisateurs" },
-              { value: "100%", label: "Sécurisé JWT" },
-              { value: "24/7", label: "Disponible" },
-            ].map((stat) => (
-              <Box key={stat.label}>
-                <Typography variant="h5" sx={{ fontWeight: 800, color: "#1976D2" }}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="caption" sx={{ color: "#6b6375" }}>
-                  {stat.label}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
         </Box>
 
         {/* Illustration droite */}

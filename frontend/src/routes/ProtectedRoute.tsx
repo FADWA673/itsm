@@ -29,7 +29,11 @@ const ProtectedRoute = ({ requiredRole }: ProtectedRouteProps) => {
   }
 
   if (requiredRole && !hasRole(requiredRole)) {
-    return <Navigate to={PATHS.DASHBOARD} replace />;
+    // ADMIN peut aussi accéder aux routes SUPER_ADMIN
+    const isAdminRoute = requiredRole === "SUPER_ADMIN" && hasRole("ADMIN");
+    if (!isAdminRoute) {
+      return <Navigate to={PATHS.LOGIN} replace />;
+    }
   }
 
   return <Outlet />;

@@ -11,6 +11,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { PATHS } from "../routes/paths";
 import { useAuthStore } from "../store";
 import { loginApi } from "../services/auth.service";
+import { getDashboardByRole } from "../utils/roleRedirect";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -32,7 +33,8 @@ function LoginPage() {
         refreshToken: result.refreshToken,
         expiresIn: result.expiresIn,
       });
-      navigate(PATHS.DASHBOARD);
+      // Redirection selon le rôle
+      navigate(getDashboardByRole(result.user.role));
     } catch (err) {
       const message = err && typeof err === "object" && "message" in err
         ? String((err as { message: string }).message)

@@ -10,8 +10,12 @@ export const PATHS = {
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
 
-  // App (protégées — requièrent authentification)
+  // Dashboards par rôle
   DASHBOARD: "/dashboard",
+  ADMIN_DASHBOARD: "/admin/dashboard",
+  MANAGER_DASHBOARD: "/manager/dashboard",
+  TECHNICIAN_DASHBOARD: "/technician/dashboard",
+  EMPLOYEE_DASHBOARD: "/employee/dashboard",
 
   // Tickets
   TICKETS: "/tickets",
