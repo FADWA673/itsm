@@ -25,6 +25,7 @@ const SLAPage = lazy(() => import("../pages/admin/SLAPage"));
 const AuditLogsPage = lazy(() => import("../pages/admin/AuditLogsPage"));
 const SystemSettingsPage = lazy(() => import("../pages/admin/SystemSettingsPage"));
 const ManagerDashboardPage = lazy(() => import("../pages/manager/ManagerDashboardPage"));
+const DeptManagerDashboardPage = lazy(() => import("../pages/dept-manager/DeptManagerDashboardPage"));
 const TechnicianDashboardPage = lazy(() => import("../pages/technician/TechnicianDashboardPage"));
 const EmployeeDashboardPage = lazy(() => import("../pages/employee/EmployeeDashboardPage"));
 
@@ -56,6 +57,11 @@ function AppRouter() {
         {/* ── Manager Dashboard ─────────────────────────────────────── */}
         <Route element={<ProtectedRoute requiredRole="MANAGER" />}>
           <Route path={PATHS.MANAGER_DASHBOARD} element={<ManagerDashboardPage />} />
+        </Route>
+
+        {/* ── Dept Manager Dashboard ────────────────────────────────── */}
+        <Route element={<ProtectedRoute requiredRole="DEPT_MANAGER" />}>
+          <Route path={PATHS.DEPT_MANAGER_DASHBOARD} element={<DeptManagerDashboardPage />} />
         </Route>
 
         {/* ── Technician Dashboard ──────────────────────────────────── */}

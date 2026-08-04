@@ -11,6 +11,8 @@ export function getDashboardByRole(role: string): string {
       return PATHS.ADMIN_DASHBOARD;
     case "MANAGER":
       return PATHS.MANAGER_DASHBOARD;
+    case "DEPT_MANAGER":
+      return PATHS.DEPT_MANAGER_DASHBOARD;
     case "TECHNICIAN":
       return PATHS.TECHNICIAN_DASHBOARD;
     case "USER":

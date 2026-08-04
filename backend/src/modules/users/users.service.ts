@@ -51,7 +51,7 @@ export class UsersService {
         passwordHash,
         firstName: data.firstName,
         lastName: data.lastName,
-        role: data.role as "SUPER_ADMIN" | "ADMIN" | "MANAGER" | "TECHNICIAN" | "USER",
+        role: data.role as "SUPER_ADMIN" | "ADMIN" | "MANAGER" | "DEPT_MANAGER" | "TECHNICIAN" | "USER",
         status: "ACTIVE",
         organizationId: data.organizationId || creatorOrgId,
       },
@@ -69,7 +69,7 @@ export class UsersService {
       data: {
         ...(data.firstName && { firstName: data.firstName }),
         ...(data.lastName && { lastName: data.lastName }),
-        ...(data.role && { role: data.role as "SUPER_ADMIN" | "ADMIN" | "MANAGER" | "TECHNICIAN" | "USER" }),
+        ...(data.role && { role: data.role as "SUPER_ADMIN" | "ADMIN" | "MANAGER" | "DEPT_MANAGER" | "TECHNICIAN" | "USER" }),
         ...(data.status && { status: data.status as "ACTIVE" | "INACTIVE" | "SUSPENDED" | "PENDING" }),
       },
     });

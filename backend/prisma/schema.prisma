@@ -30,6 +30,7 @@ enum UserRole {
   SUPER_ADMIN
   ADMIN
   MANAGER
+  DEPT_MANAGER
   TECHNICIAN
   USER
 }

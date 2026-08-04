@@ -33,12 +33,21 @@ import { useNotificationStore } from "../../store";
 
 const ROLE_COLORS: Record<string, string> = {
   SUPER_ADMIN: "#7C3AED",
-  ADMIN: "#2563EB",
+  ADMIN: "#7C3AED",
   MANAGER: "#059669",
+  DEPT_MANAGER: "#2563EB",
   TECHNICIAN: "#D97706",
   USER: "#6B7280",
 };
-const ROLES = ["SUPER_ADMIN", "ADMIN", "MANAGER", "TECHNICIAN", "USER"];
+const ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN: "Admin",
+  ADMIN: "Admin",
+  MANAGER: "IT Manager",
+  DEPT_MANAGER: "Dept. Manager",
+  TECHNICIAN: "Technician",
+  USER: "Employee",
+};
+const ROLES = ["SUPER_ADMIN", "ADMIN", "MANAGER", "DEPT_MANAGER", "TECHNICIAN", "USER"];
 const STATUSES = ["ACTIVE", "INACTIVE", "SUSPENDED"];
 const GRID = "2fr 2fr 1.5fr 1fr 1fr 1fr";
 
@@ -209,7 +218,7 @@ function ManageUsersPage() {
                 <Typography sx={{ fontSize: 14, fontWeight: 600, color: ADMIN_COLORS.textPrimary }}>{user.firstName} {user.lastName}</Typography>
               </Box>
               <Typography sx={{ fontSize: 13, color: ADMIN_COLORS.textSecondary }}>{user.email}</Typography>
-              <Chip label={user.role.replace("_", " ")} size="small" sx={{ bgcolor: `${ROLE_COLORS[user.role]}15`, color: ROLE_COLORS[user.role], fontWeight: 600, fontSize: 11, width: "fit-content" }} />
+              <Chip label={ROLE_LABELS[user.role] || user.role.replace("_", " ")} size="small" sx={{ bgcolor: `${ROLE_COLORS[user.role]}15`, color: ROLE_COLORS[user.role], fontWeight: 600, fontSize: 11, width: "fit-content" }} />
               <Chip label={user.status} size="small" sx={{ bgcolor: user.status === "ACTIVE" ? "#ECFDF5" : "#FEF2F2", color: user.status === "ACTIVE" ? "#059669" : "#DC2626", fontWeight: 600, fontSize: 11, width: "fit-content" }} />
               <Typography sx={{ fontSize: 13, color: ADMIN_COLORS.textSecondary }}>{formatDate(user.lastLoginAt)}</Typography>
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -238,7 +247,7 @@ function ManageUsersPage() {
             <FormControl size="small" fullWidth>
               <InputLabel>Role</InputLabel>
               <Select label="Role" value={addForm.role} onChange={(e) => setAddForm({ ...addForm, role: e.target.value })}>
-                {ROLES.map((r) => (<MenuItem key={r} value={r}><Box sx={{ display: "flex", alignItems: "center", gap: 1 }}><Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: ROLE_COLORS[r] }} />{r.replace("_", " ")}</Box></MenuItem>))}
+                {ROLES.map((r) => (<MenuItem key={r} value={r}><Box sx={{ display: "flex", alignItems: "center", gap: 1 }}><Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: ROLE_COLORS[r] }} />{ROLE_LABELS[r] || r.replace("_", " ")}</Box></MenuItem>))}
               </Select>
             </FormControl>
           </Box>

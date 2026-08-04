@@ -14,6 +14,7 @@ export const PATHS = {
   DASHBOARD: "/dashboard",
   ADMIN_DASHBOARD: "/admin/dashboard",
   MANAGER_DASHBOARD: "/manager/dashboard",
+  DEPT_MANAGER_DASHBOARD: "/dept-manager/dashboard",
   TECHNICIAN_DASHBOARD: "/technician/dashboard",
   EMPLOYEE_DASHBOARD: "/employee/dashboard",
 
