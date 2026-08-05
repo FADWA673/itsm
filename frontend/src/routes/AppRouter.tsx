@@ -28,6 +28,8 @@ const ManagerDashboardPage = lazy(() => import("../pages/manager/ManagerDashboar
 const DeptManagerDashboardPage = lazy(() => import("../pages/dept-manager/DeptManagerDashboardPage"));
 const TechnicianDashboardPage = lazy(() => import("../pages/technician/TechnicianDashboardPage"));
 const EmployeeDashboardPage = lazy(() => import("../pages/employee/EmployeeDashboardPage"));
+const MyTicketsPage = lazy(() => import("../pages/employee/MyTicketsPage"));
+const CreateTicketPage = lazy(() => import("../pages/employee/CreateTicketPage"));
 
 function AppRouter() {
   return (
@@ -73,6 +75,8 @@ function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route path={PATHS.EMPLOYEE_DASHBOARD} element={<EmployeeDashboardPage />} />
           <Route path={PATHS.DASHBOARD} element={<EmployeeDashboardPage />} />
+          <Route path="/employee/tickets" element={<MyTicketsPage />} />
+          <Route path="/employee/create-ticket" element={<CreateTicketPage />} />
         </Route>
 
         {/* ── 404 ──────────────────────────────────────────────────── */}
