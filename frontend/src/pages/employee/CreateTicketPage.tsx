@@ -12,7 +12,8 @@ import Alert from "@mui/material/Alert";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../layouts/EmployeeLayout";
-import { useNotificationStore } from "../../store";
+import { useAuthStore, useNotificationStore } from "../../store";
+import { createTicketApi } from "../../services/tickets.service";
 
 const CATEGORIES = ["Software", "Hardware", "Network", "Access Request", "Email & Communication", "Printer & Peripherals", "Security", "General IT Support"];
 const PRIORITIES = ["Low", "Medium", "High", "Critical"];
@@ -21,6 +22,8 @@ const IMPACTS = ["Individual", "Department", "Multiple Departments", "Entire Org
 function CreateTicketPage() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
+  const _auth = useAuthStore();
+  void _auth;
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ category: "", subject: "", description: "", priority: "", impact: "" });
   const [error, setError] = useState("");
@@ -32,11 +35,22 @@ function CreateTicketPage() {
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      await createTicketApi({
+        category: form.category,
+        subject: form.subject,
+        description: form.description,
+        priority: form.priority.toUpperCase(),
+        impact: form.impact.toUpperCase().replace(/ /g, "_"),
+      });
       addNotification("Ticket submitted successfully!", "success");
       navigate("/employee/tickets");
-    }, 1000);
+    } catch (err) {
+      const msg = err && typeof err === "object" && "message" in err ? String((err as { message: string }).message) : "Failed to submit ticket";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

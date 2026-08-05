@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
@@ -13,19 +13,16 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../layouts/EmployeeLayout";
+import { getMyTicketsApi, type TicketDTO } from "../../services/tickets.service";
 
-const ALL_TICKETS = [
-  { id: "INC-2026-000001", subject: "Cannot login to ERP", category: "Software", priority: "High", status: "In Progress", created: "15 Jul", updated: "Today" },
-  { id: "INC-2026-000002", subject: "Printer not responding", category: "Hardware", priority: "Medium", status: "Open", created: "14 Jul", updated: "Yesterday" },
-  { id: "INC-2026-000003", subject: "VPN connection failed", category: "Network", priority: "High", status: "Waiting for User", created: "13 Jul", updated: "2 days ago" },
-  { id: "INC-2026-000004", subject: "Outlook keeps crashing", category: "Software", priority: "Low", status: "Resolved", created: "10 Jul", updated: "10 Jul" },
-  { id: "INC-2026-000005", subject: "New employee account request", category: "Access Request", priority: "Medium", status: "Closed", created: "08 Jul", updated: "09 Jul" },
-  { id: "INC-2026-000006", subject: "Monitor display issues", category: "Hardware", priority: "Low", status: "Open", created: "07 Jul", updated: "07 Jul" },
-  { id: "INC-2026-000007", subject: "Cannot access shared drive", category: "Network", priority: "High", status: "In Progress", created: "05 Jul", updated: "06 Jul" },
-  { id: "INC-2026-000008", subject: "Teams call quality poor", category: "Software", priority: "Medium", status: "Resolved", created: "03 Jul", updated: "04 Jul" },
-];
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
+  "IN_PROGRESS": { bg: "#FEF3C7", text: "#D97706" },
+  "OPEN": { bg: "#EFF6FF", text: "#2563EB" },
+  "WAITING_FOR_USER": { bg: "#F3E8FF", text: "#7C3AED" },
+  "RESOLVED": { bg: "#ECFDF5", text: "#059669" },
+  "CLOSED": { bg: "#F3F4F6", text: "#6B7280" },
+  // Display-friendly aliases
   "In Progress": { bg: "#FEF3C7", text: "#D97706" },
   "Open": { bg: "#EFF6FF", text: "#2563EB" },
   "Waiting for User": { bg: "#F3E8FF", text: "#7C3AED" },
@@ -34,6 +31,11 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 const PRIORITY_COLORS: Record<string, { bg: string; text: string }> = {
+  HIGH: { bg: "#FEF2F2", text: "#DC2626" },
+  MEDIUM: { bg: "#FFFBEB", text: "#D97706" },
+  LOW: { bg: "#ECFDF5", text: "#059669" },
+  CRITICAL: { bg: "#FDF2F8", text: "#9D174D" },
+  // Display-friendly aliases
   High: { bg: "#FEF2F2", text: "#DC2626" },
   Medium: { bg: "#FFFBEB", text: "#D97706" },
   Low: { bg: "#ECFDF5", text: "#059669" },
@@ -43,13 +45,23 @@ const PAGE_SIZE = 5;
 
 function MyTicketsPage() {
   const navigate = useNavigate();
+  const [tickets, setTickets] = useState<TicketDTO[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [page, setPage] = useState(1);
 
-  const filtered = ALL_TICKETS.filter((t) => {
-    const matchSearch = t.subject.toLowerCase().includes(search.toLowerCase()) || t.id.toLowerCase().includes(search.toLowerCase());
+  useEffect(() => {
+    let cancelled = false;
+    getMyTicketsApi()
+      .then((data) => { if (!cancelled) setTickets(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const filtered = tickets.filter((t) => {
+    const matchSearch = t.subject.toLowerCase().includes(search.toLowerCase()) || t.ticketNumber.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "All" || t.status === statusFilter;
     const matchPriority = priorityFilter === "All" || t.priority === priorityFilter;
     return matchSearch && matchStatus && matchPriority;
@@ -73,13 +85,13 @@ function MyTicketsPage() {
         <FormControl size="small" sx={{ minWidth: 130 }}>
           <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} displayEmpty>
             <MenuItem value="All">Status</MenuItem>
-            {["Open", "In Progress", "Waiting for User", "Resolved", "Closed"].map((s) => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+            {["OPEN", "IN_PROGRESS", "WAITING_FOR_USER", "RESOLVED", "CLOSED"].map((s) => <MenuItem key={s} value={s}>{s.replace(/_/g, " ")}</MenuItem>)}
           </Select>
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 130 }}>
           <Select value={priorityFilter} onChange={(e) => { setPriorityFilter(e.target.value); setPage(1); }} displayEmpty>
             <MenuItem value="All">Priority</MenuItem>
-            {["High", "Medium", "Low"].map((p) => <MenuItem key={p} value={p}>{p}</MenuItem>)}
+            {["HIGH", "MEDIUM", "LOW", "CRITICAL"].map((p) => <MenuItem key={p} value={p}>{p}</MenuItem>)}
           </Select>
         </FormControl>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate("/employee/create-ticket")} sx={{ bgcolor: "#2563EB", textTransform: "none", fontWeight: 600, "&:hover": { bgcolor: "#1D4ED8" } }}>
@@ -102,13 +114,13 @@ function MyTicketsPage() {
 
         {paginated.map((ticket, i) => (
           <Box key={ticket.id} sx={{ display: "grid", gridTemplateColumns: "1.5fr 2.5fr 1fr 1fr 1.2fr 1fr 1fr 0.8fr", px: 3, py: 1.5, borderBottom: i < paginated.length - 1 ? "1px solid #F3F4F6" : "none", alignItems: "center", "&:hover": { bgcolor: "#F9FAFB" } }}>
-            <Typography sx={{ fontSize: 12, fontFamily: "monospace", color: "#374151" }}>{ticket.id}</Typography>
+            <Typography sx={{ fontSize: 12, fontFamily: "monospace", color: "#374151" }}>{ticket.ticketNumber}</Typography>
             <Typography sx={{ fontSize: 13, color: "#111827" }}>{ticket.subject}</Typography>
             <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{ticket.category}</Typography>
             <Chip label={ticket.priority} size="small" sx={{ bgcolor: PRIORITY_COLORS[ticket.priority]?.bg, color: PRIORITY_COLORS[ticket.priority]?.text, fontWeight: 600, fontSize: 11, height: 22 }} />
-            <Chip label={ticket.status} size="small" sx={{ bgcolor: STATUS_COLORS[ticket.status]?.bg, color: STATUS_COLORS[ticket.status]?.text, fontWeight: 600, fontSize: 11, height: 22 }} />
-            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{ticket.created}</Typography>
-            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{ticket.updated}</Typography>
+            <Chip label={ticket.status.replace(/_/g, " ")} size="small" sx={{ bgcolor: STATUS_COLORS[ticket.status]?.bg, color: STATUS_COLORS[ticket.status]?.text, fontWeight: 600, fontSize: 11, height: 22 }} />
+            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{new Date(ticket.createdAt).toLocaleDateString()}</Typography>
+            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{new Date(ticket.updatedAt).toLocaleDateString()}</Typography>
             <Typography sx={{ fontSize: 12, color: "#2563EB", cursor: "pointer", fontWeight: 600 }}>View</Typography>
           </Box>
         ))}
