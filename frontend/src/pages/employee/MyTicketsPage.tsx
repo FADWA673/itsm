@@ -57,7 +57,6 @@ function MyTicketsPage() {
       .then((data) => { if (!cancelled) setTickets(data); })
       .catch(() => {});
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = tickets.filter((t) => {

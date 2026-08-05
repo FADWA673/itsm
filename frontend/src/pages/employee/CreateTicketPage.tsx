@@ -22,8 +22,8 @@ const IMPACTS = ["Individual", "Department", "Multiple Departments", "Entire Org
 function CreateTicketPage() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
-  const _auth = useAuthStore();
-  void _auth;
+  const { user } = useAuthStore();
+  void user;
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ category: "", subject: "", description: "", priority: "", impact: "" });
   const [error, setError] = useState("");
