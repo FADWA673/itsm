@@ -23,14 +23,14 @@ const USERS = [
     password: "Admin@1234",
     firstName: "Admin",
     lastName: "ITSM",
-    role: "ADMIN",
+    role: "SUPER_ADMIN",
   },
   {
     email: "employee@gmail.com",
     password: "Employee@1234",
     firstName: "Ahmed",
     lastName: "Employé",
-    role: "EMPLOYE",
+    role: "USER",
   },
   {
     email: "tech@gmail.com",
