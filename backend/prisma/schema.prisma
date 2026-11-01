@@ -48,9 +48,195 @@ enum OrganizationStatus {
   SUSPENDED
 }
 
-// =============================================================================
-// Models
-// =============================================================================
+enum TicketStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  WAITING_FOR_USER
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TicketImpact {
+  INDIVIDUAL
+  DEPARTMENT
+  MULTIPLE_DEPARTMENTS
+  ENTIRE_ORGANIZATION
+}
+
+enum TicketSource {
+  WEB
+  WHATSAPP
+  EMAIL
+  PHONE
+}
+
+enum NotificationType {
+  TICKET_CREATED
+  TICKET_UPDATED
+  TICKET_ASSIGNED
+  TICKET_RESOLVED
+  TICKET_CLOSED
+  SYSTEM_INFO
+  SYSTEM_WARNING
+  SLA_BREACH
+}
+
+enum AssetType {
+  DESKTOP
+  LAPTOP
+  PRINTER
+  SERVER
+  ROUTER
+  SWITCH
+  MONITOR
+  PHONE
+  TABLET
+  OTHER
+}
+
+enum AssetStatus {
+  ACTIVE
+  AVAILABLE
+  MAINTENANCE
+  RETIRED
+  DAMAGED
+}
+
+enum KBArticleStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  ARCHIVED
+}
+
+/// Notification in-app pour un utilisateur
+model Notification {
+  id         String           @id @default(cuid())
+  type       NotificationType
+  title      String           @db.VarChar(255)
+  message    String           @db.Text
+  read       Boolean          @default(false)
+  readAt     DateTime?
+  createdAt  DateTime         @default(now())
+
+  // Relation vers l'utilisateur destinataire
+  userId     String
+  user       User             @relation("UserNotifications", fields: [userId], references: [id])
+
+  // Lien optionnel vers le ticket concerné
+  ticketId   String?
+  ticket     Ticket?          @relation("TicketNotifications", fields: [ticketId], references: [id])
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+/// Configuration SLA par priorité
+model SLAConfig {
+  id           String   @id @default(cuid())
+  priority     String   @unique // "CRITICAL", "HIGH", "MEDIUM", "LOW"
+  responseTime Int      // Minutes pour première réponse du technicien
+  resolveTime  Int      // Minutes pour résolution complète
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([priority])
+  @@map("sla_configs")
+}
+
+/// Catégorie de ticket (Hardware, Software, Network, etc.)
+model TicketCategory {
+  id              String   @id @default(cuid())
+  name            String   @db.VarChar(100)
+  description     String?  @db.Text
+  icon            String?  @db.VarChar(50)  // Emoji ou nom icône Material UI
+  color           String?  @db.VarChar(20)  // Code couleur hex
+  parentId        String?
+  parent          TicketCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  subcategories   TicketCategory[] @relation("CategoryHierarchy")
+  active          Boolean  @default(true)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  
+  tickets         Ticket[]
+  
+  @@index([organizationId])
+  @@index([active])
+  @@index([parentId])
+  @@map("ticket_categories")
+}
+
+/// Ticket de support IT
+model Ticket {
+  id             String         @id @default(cuid())
+  ticketNumber   String         @unique
+  subject        String         @db.VarChar(500)
+  description    String         @db.Text
+  categoryId     String?
+  category       TicketCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  status         TicketStatus   @default(OPEN)
+  priority       TicketPriority @default(MEDIUM)
+  impact         TicketImpact   @default(INDIVIDUAL)
+  source         TicketSource   @default(WEB)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  resolvedAt     DateTime?
+  closedAt       DateTime?
+
+  // SLA Fields (NEW)
+  slaDeadline       DateTime?  // Date/heure limite de résolution
+  slaBreached       Boolean    @default(false) // Si le SLA a été dépassé
+  firstResponseAt   DateTime?  // Première réponse d'un technicien (Start Work)
+  resolutionTime    Int?       // Temps de résolution en minutes
+
+  // Relations
+  createdById    String
+  createdBy      User           @relation("TicketsCreated", fields: [createdById], references: [id])
+
+  assignedToId   String?
+  assignedTo     User?          @relation("TicketsAssigned", fields: [assignedToId], references: [id])
+
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+
+  // Lien optionnel vers un contact externe (WhatsApp)
+  contactId      String?
+  contact        Contact?       @relation("ContactTickets", fields: [contactId], references: [id])
+
+  // Lien optionnel vers un asset
+  assetId        String?
+  asset          Asset?         @relation("TicketAssets", fields: [assetId], references: [id])
+
+  notifications  Notification[] @relation("TicketNotifications")
+  comments       TicketComment[]
+  attachments    Attachment[] @relation("TicketAttachments")
+  rating         TicketRating? @relation("TicketRating")
+  history        TicketHistory[]
+
+  @@index([createdById])
+  @@index([organizationId])
+  @@index([status])
+  @@index([categoryId])
+  @@index([assetId])
+  @@index([contactId])
+  @@index([slaDeadline])
+  @@index([slaBreached])
+  @@map("tickets")
+}
 
 /// Organisation (tenant) — chaque entreprise cliente de la plateforme ITSM
 model Organization {
@@ -66,6 +252,12 @@ model Organization {
 
   // Relations
   users User[]
+  tickets Ticket[]
+  assets Asset[]
+  kbArticles KBArticle[]
+  kbCategories KBCategory[]
+  ticketCategories TicketCategory[]
+  contacts Contact[]
 
   @@map("organizations")
 }
@@ -90,7 +282,248 @@ model User {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id])
 
+  ticketsCreated  Ticket[] @relation("TicketsCreated")
+  ticketsAssigned Ticket[] @relation("TicketsAssigned")
+  notifications   Notification[] @relation("UserNotifications")
+  comments        TicketComment[]
+  attachments     Attachment[] @relation("UserAttachments")
+  assetsAssigned  Asset[] @relation("UserAssets")
+  assetHistories  AssetHistory[]
+  kbArticlesCreated KBArticle[] @relation("KBArticleAuthor")
+  kbArticlesReviewed KBArticle[] @relation("KBArticleReviewer")
+  ratings         TicketRating[] @relation("UserRatings")
+  ticketHistory   TicketHistory[] @relation("UserTicketHistory")
+
   @@index([email])
   @@index([organizationId])
   @@map("users")
+}
+
+/// Commentaire sur un ticket (conversation entre user et technicien)
+model TicketComment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Auteur
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+
+  // Ticket
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_comments")
+}
+
+/// Note de satisfaction d'un ticket (1 à 5 étoiles)
+model TicketRating {
+  id        String   @id @default(cuid())
+  rating    Int      // 1 à 5 étoiles
+  comment   String?  @db.Text // Commentaire optionnel
+  createdAt DateTime @default(now())
+
+  // Ticket concerné (un ticket = une seule note)
+  ticketId  String   @unique
+  ticket    Ticket   @relation("TicketRating", fields: [ticketId], references: [id], onDelete: Cascade)
+
+  // Créateur de la note (l'employé qui a créé le ticket)
+  createdById String
+  createdBy   User   @relation("UserRatings", fields: [createdById], references: [id])
+
+  @@index([ticketId])
+  @@index([rating])
+  @@map("ticket_ratings")
+}
+
+/// Historique des actions sur un ticket (timeline complète)
+model TicketHistory {
+  id        String   @id @default(cuid())
+  action    String   @db.VarChar(100) // CREATED, ASSIGNED, STATUS_CHANGED, COMMENT_ADDED, etc.
+  oldValue  String?  @db.VarChar(500) // Ancienne valeur (ex: statut précédent, ancien technicien)
+  newValue  String?  @db.VarChar(500) // Nouvelle valeur
+  comment   String?  @db.Text // Commentaire ou raison de l'action
+  createdAt DateTime @default(now())
+
+  // Ticket concerné
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  // Utilisateur qui a effectué l'action
+  userId    String
+  user      User     @relation("UserTicketHistory", fields: [userId], references: [id])
+
+  @@index([ticketId, createdAt])
+  @@index([userId])
+  @@index([action])
+  @@map("ticket_history")
+}
+
+/// Pièce jointe liée à un ticket (images, PDF, Word, Excel, etc.)
+model Attachment {
+  id           String   @id @default(cuid())
+  filename     String   @db.VarChar(255)
+  originalName String   @db.VarChar(255)
+  mimeType     String   @db.VarChar(100)
+  size         Int      // Taille en bytes
+  url          String   @db.VarChar(500)
+  createdAt    DateTime @default(now())
+
+  // Relation vers le ticket
+  ticketId     String
+  ticket       Ticket   @relation("TicketAttachments", fields: [ticketId], references: [id], onDelete: Cascade)
+
+  // Auteur de l'upload
+  uploadedById String
+  uploadedBy   User     @relation("UserAttachments", fields: [uploadedById], references: [id])
+
+  @@index([ticketId])
+  @@index([uploadedById])
+  @@map("attachments")
+}
+
+/// Actif IT (équipement informatique)
+model Asset {
+  id              String      @id @default(cuid())
+  serialNumber    String      @unique @db.VarChar(100)
+  type            AssetType
+  brand           String      @db.VarChar(100)
+  model           String      @db.VarChar(255)
+  status          AssetStatus @default(AVAILABLE)
+  location        String      @db.VarChar(255)
+  purchaseDate    DateTime
+  warrantyExpiry  DateTime?
+  notes           String?     @db.Text
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relation vers l'utilisateur assigné (optionnel)
+  assignedToId    String?
+  assignedTo      User?       @relation("UserAssets", fields: [assignedToId], references: [id])
+
+  // Relation vers l'organisation
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  // Relations
+  tickets         Ticket[]    @relation("TicketAssets")
+  history         AssetHistory[]
+
+  @@index([serialNumber])
+  @@index([organizationId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([type])
+  @@map("assets")
+}
+
+/// Historique des affectations d'un actif
+model AssetHistory {
+  id          String   @id @default(cuid())
+  action      String   @db.VarChar(50) // ASSIGNED, UNASSIGNED, STATUS_CHANGED, LOCATION_CHANGED
+  oldValue    String?  @db.VarChar(255)
+  newValue    String?  @db.VarChar(255)
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  // Relation vers l'actif
+  assetId     String
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  // Utilisateur qui a effectué l'action
+  performedById String
+  performedBy   User   @relation(fields: [performedById], references: [id])
+
+  @@index([assetId, createdAt])
+  @@map("asset_history")
+}
+
+/// Catégorie de la base de connaissances
+model KBCategory {
+  id              String   @id @default(cuid())
+  name            String   @db.VarChar(255)
+  slug            String   @unique @db.VarChar(255)
+  description     String?  @db.Text
+  icon            String?  @db.VarChar(50)
+  displayOrder    Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relation vers l'organisation
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  // Relations
+  articles        KBArticle[]
+
+  @@index([organizationId])
+  @@index([slug])
+  @@map("kb_categories")
+}
+
+/// Article de la base de connaissances
+model KBArticle {
+  id              String          @id @default(cuid())
+  title           String          @db.VarChar(500)
+  slug            String          @db.VarChar(500)
+  content         String          @db.Text
+  excerpt         String?         @db.Text
+  status          KBArticleStatus @default(DRAFT)
+  views           Int             @default(0)
+  helpful         Int             @default(0)
+  notHelpful      Int             @default(0)
+  tags            String?         @db.VarChar(500) // Comma-separated tags
+  publishedAt     DateTime?
+  rejectedReason  String?         @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Auteur (Technician ou Admin)
+  authorId        String
+  author          User            @relation("KBArticleAuthor", fields: [authorId], references: [id])
+
+  // Reviewer (Admin qui valide/rejette)
+  reviewedById    String?
+  reviewedBy      User?           @relation("KBArticleReviewer", fields: [reviewedById], references: [id])
+
+  // Catégorie
+  categoryId      String
+  category        KBCategory      @relation(fields: [categoryId], references: [id])
+
+  // Organisation
+  organizationId  String
+  organization    Organization    @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([status])
+  @@index([slug])
+  @@map("kb_articles")
+}
+
+/// Contact externe (WhatsApp, Email, Phone)
+model Contact {
+  id              String   @id @default(cuid())
+  phoneNumber     String   @unique @db.VarChar(20) // Format: +212612345678
+  name            String?  @db.VarChar(255)
+  email           String?  @db.VarChar(255)
+  lastMessageAt   DateTime?
+  isBlocked       Boolean  @default(false)
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Organisation
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  // Tickets créés par ce contact
+  tickets         Ticket[] @relation("ContactTickets")
+
+  @@index([phoneNumber])
+  @@index([organizationId])
+  @@map("contacts")
 }

@@ -27,6 +27,34 @@ export const PATHS = {
   ASSETS: "/assets",
   ASSET_DETAIL: "/assets/:id",
 
+  // Employee pages
+  EMPLOYEE_NOTIFICATIONS: "/employee/notifications",
+  EMPLOYEE_PROFILE: "/employee/profile",
+  EMPLOYEE_TICKETS: "/employee/tickets",
+  EMPLOYEE_TICKET_DETAIL: "/employee/tickets/:id",
+  EMPLOYEE_CREATE_TICKET: "/employee/create-ticket",
+  EMPLOYEE_KNOWLEDGE_BASE: "/employee/kb",
+  EMPLOYEE_KB_ARTICLE: "/employee/kb/:slug",
+
+  // Admin pages
+  ADMIN_TICKETS: "/admin/tickets",
+  ADMIN_TICKET_DETAIL: "/admin/tickets/:id",
+  ADMIN_KB_PENDING: "/admin/kb/pending",
+  ADMIN_KB_ARTICLES: "/admin/kb/articles",
+  ADMIN_KB_CATEGORIES: "/admin/kb/categories",
+  ADMIN_WHATSAPP: "/admin/whatsapp",
+
+  // Technician pages
+  TECHNICIAN_TICKETS: "/technician/tickets",
+  TECHNICIAN_TICKET_DETAIL: "/technician/tickets/:id",
+  TECHNICIAN_ALL_TICKETS: "/technician/all-tickets",
+  TECHNICIAN_QUEUE: "/technician/queue",
+  TECHNICIAN_SETTINGS: "/technician/settings",
+  TECHNICIAN_ASSETS: "/technician/assets",
+  TECHNICIAN_KB: "/technician/kb",
+  TECHNICIAN_KB_CREATE: "/technician/kb/create",
+  TECHNICIAN_KB_EDIT: "/technician/kb/edit/:id",
+
   // Administration
   ADMIN: "/admin",
   ADMIN_USERS: "/admin/users",

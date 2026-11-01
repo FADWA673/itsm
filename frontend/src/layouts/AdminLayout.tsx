@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -17,10 +17,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 
-import { useAuthStore, useThemeStore } from "../store";
+import { useAuthStore, useThemeStore, useInAppNotificationStore } from "../store";
 import { PATHS } from "../routes/paths";
 import { getAdminColors, SIDEBAR_WIDTH } from "../styles/adminTheme";
 import { ADMIN_NAV_ITEMS } from "../routes/adminNavItems";
+import { LanguageSelector } from "../components/LanguageSelector";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -34,9 +35,15 @@ function AdminLayout({ children, title }: AdminLayoutProps) {
   const { mode, toggleMode } = useThemeStore();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const C = getAdminColors(mode); // couleurs selon le mode actuel
+  const C = getAdminColors(mode);
   const handleLogout = () => { logout(); navigate(PATHS.LOGIN); };
   const initials = user ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : "AD";
+  const { unreadCount, load, initialized } = useInAppNotificationStore();
+  const badgeCount = unreadCount;
+
+  useEffect(() => {
+    if (!initialized) load();
+  }, [initialized, load]);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: C.pageBg }}>
@@ -65,7 +72,7 @@ function AdminLayout({ children, title }: AdminLayoutProps) {
         </Box>
 
         {/* Navigation */}
-        <List sx={{ flex: 1, px: 1, py: 1.5 }}>
+        <List sx={{ flex: 1, px: 1, py: 1.5, overflowY: "auto", overflowX: "hidden" }}>
           {ADMIN_NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -150,12 +157,30 @@ function AdminLayout({ children, title }: AdminLayoutProps) {
               </IconButton>
             </Tooltip>
 
-            <IconButton size="small" sx={{ color: C.textSecondary }}>
-              <Badge badgeContent={3} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            <Avatar sx={{ width: 34, height: 34, bgcolor: C.primary, fontSize: 13, cursor: "pointer" }}>{initials}</Avatar>
+            {/* Language Selector */}
+            <Box sx={{ borderLeft: `1px solid ${C.border}`, pl: 1, ml: 0.5 }}>
+              <LanguageSelector />
+            </Box>
+
+            <Tooltip title="Notifications">
+              <IconButton
+                size="small"
+                sx={{ color: C.textSecondary }}
+                onClick={() => navigate(PATHS.EMPLOYEE_NOTIFICATIONS)}
+              >
+                <Badge badgeContent={badgeCount || undefined} color="error" max={99}>
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="My profile">
+              <Avatar
+                onClick={() => navigate(PATHS.EMPLOYEE_PROFILE)}
+                sx={{ width: 34, height: 34, bgcolor: C.primary, fontSize: 13, cursor: "pointer" }}
+              >
+                {initials}
+              </Avatar>
+            </Tooltip>
           </Box>
         </Box>
 

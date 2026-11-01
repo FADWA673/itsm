@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -13,37 +14,47 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PersonIcon from "@mui/icons-material/Person";
 import { useAuthStore } from "../../store";
 import EmployeeLayout from "../../layouts/EmployeeLayout";
-
-const STATS = [
-  { label: "Open Tickets", value: "5", desc: "Currently assigned to you", color: "#2563EB" },
-  { label: "In Progress", value: "2", desc: "Currently assigned to you", color: "#F59E0B" },
-  { label: "Resolved", value: "15", desc: "Currently assigned to you", color: "#10B981" },
-  { label: "Pending Response", value: "1", desc: "Currently assigned to you", color: "#EF4444" },
-];
-
-const RECENT_TICKETS = [
-  { id: "INC-2026-000001", subject: "Cannot login to ERP", category: "Software", priority: "High", status: "In Progress", created: "15 Jul", updated: "Today" },
-  { id: "INC-2026-000002", subject: "Printer not responding", category: "Hardware", priority: "Medium", status: "Open", created: "14 Jul", updated: "Yesterday" },
-  { id: "INC-2026-000003", subject: "VPN connection failed", category: "Network", priority: "High", status: "Waiting for User", created: "13 Jul", updated: "2 days ago" },
-  { id: "INC-2026-000004", subject: "Outlook keeps crashing", category: "Software", priority: "Low", status: "Resolved", created: "10 Jul", updated: "10 Jul" },
-];
+import { getMyTicketsApi, type TicketDTO } from "../../services/tickets.service";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  "In Progress": { bg: "#FEF3C7", text: "#D97706" },
-  "Open": { bg: "#EFF6FF", text: "#2563EB" },
-  "Waiting for User": { bg: "#F3E8FF", text: "#7C3AED" },
-  "Resolved": { bg: "#ECFDF5", text: "#059669" },
+  IN_PROGRESS: { bg: "#FEF3C7", text: "#D97706" },
+  OPEN: { bg: "#EFF6FF", text: "#2563EB" },
+  WAITING_FOR_USER: { bg: "#F3E8FF", text: "#7C3AED" },
+  RESOLVED: { bg: "#ECFDF5", text: "#059669" },
+  CLOSED: { bg: "#F3F4F6", text: "#6B7280" },
 };
 
 const PRIORITY_COLORS: Record<string, { bg: string; text: string }> = {
-  High: { bg: "#FEF2F2", text: "#DC2626" },
-  Medium: { bg: "#FFFBEB", text: "#D97706" },
-  Low: { bg: "#ECFDF5", text: "#059669" },
+  HIGH: { bg: "#FEF2F2", text: "#DC2626" },
+  MEDIUM: { bg: "#FFFBEB", text: "#D97706" },
+  LOW: { bg: "#ECFDF5", text: "#059669" },
+  CRITICAL: { bg: "#FDF2F8", text: "#9D174D" },
 };
 
 function EmployeeDashboardPage() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const [tickets, setTickets] = useState<TicketDTO[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMyTicketsApi()
+      .then((data) => { if (!cancelled) setTickets(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const open = tickets.filter((t) => t.status === "OPEN").length;
+  const inProgress = tickets.filter((t) => t.status === "IN_PROGRESS").length;
+  const resolved = tickets.filter((t) => t.status === "RESOLVED").length;
+  const waiting = tickets.filter((t) => t.status === "WAITING_FOR_USER").length;
+
+  const STATS = [
+    { label: "Open Tickets", value: String(open), desc: "Currently assigned to you", color: "#2563EB" },
+    { label: "In Progress", value: String(inProgress), desc: "Currently assigned to you", color: "#F59E0B" },
+    { label: "Resolved", value: String(resolved), desc: "Currently assigned to you", color: "#10B981" },
+    { label: "Pending Response", value: String(waiting), desc: "Currently assigned to you", color: "#EF4444" },
+  ];
 
   return (
     <EmployeeLayout>
@@ -123,15 +134,19 @@ function EmployeeDashboardPage() {
             <Typography key={h} sx={{ fontSize: 12, fontWeight: 600, color: "#6B7280" }}>{h}</Typography>
           ))}
         </Box>
-        {RECENT_TICKETS.map((ticket, i) => (
-          <Box key={ticket.id} sx={{ display: "grid", gridTemplateColumns: "1.5fr 2fr 1fr 1fr 1.2fr 1fr 1fr 0.8fr", px: 3, py: 1.5, borderBottom: i < RECENT_TICKETS.length - 1 ? "1px solid #F3F4F6" : "none", alignItems: "center", "&:hover": { bgcolor: "#F9FAFB" } }}>
-            <Typography sx={{ fontSize: 12, fontFamily: "monospace", color: "#374151" }}>{ticket.id}</Typography>
+        {tickets.length === 0 ? (
+          <Box sx={{ py: 6, textAlign: "center" }}>
+            <Typography sx={{ color: "#9CA3AF", fontSize: 14 }}>No tickets yet. Create your first ticket!</Typography>
+          </Box>
+        ) : tickets.slice(0, 4).map((ticket, i) => (
+          <Box key={ticket.id} sx={{ display: "grid", gridTemplateColumns: "1.5fr 2fr 1fr 1fr 1.2fr 1fr 1fr 0.8fr", px: 3, py: 1.5, borderBottom: i < 3 ? "1px solid #F3F4F6" : "none", alignItems: "center", "&:hover": { bgcolor: "#F9FAFB" } }}>
+            <Typography sx={{ fontSize: 12, fontFamily: "monospace", color: "#374151" }}>{ticket.ticketNumber}</Typography>
             <Typography sx={{ fontSize: 13, color: "#111827" }}>{ticket.subject}</Typography>
             <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{ticket.category}</Typography>
             <Chip label={ticket.priority} size="small" sx={{ bgcolor: PRIORITY_COLORS[ticket.priority]?.bg, color: PRIORITY_COLORS[ticket.priority]?.text, fontWeight: 600, fontSize: 11, height: 22 }} />
-            <Chip label={ticket.status} size="small" sx={{ bgcolor: STATUS_COLORS[ticket.status]?.bg, color: STATUS_COLORS[ticket.status]?.text, fontWeight: 600, fontSize: 11, height: 22 }} />
-            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{ticket.created}</Typography>
-            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{ticket.updated}</Typography>
+            <Chip label={ticket.status.replace(/_/g, " ")} size="small" sx={{ bgcolor: STATUS_COLORS[ticket.status]?.bg, color: STATUS_COLORS[ticket.status]?.text, fontWeight: 600, fontSize: 11, height: 22 }} />
+            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{new Date(ticket.createdAt).toLocaleDateString()}</Typography>
+            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{new Date(ticket.updatedAt).toLocaleDateString()}</Typography>
             <Typography sx={{ fontSize: 12, color: "#2563EB", cursor: "pointer", fontWeight: 600 }}>View</Typography>
           </Box>
         ))}

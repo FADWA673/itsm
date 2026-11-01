@@ -14,6 +14,10 @@ COPY . .
 # Generate Prisma Client
 RUN npx prisma generate
 
+# Make startup script executable
+RUN chmod +x start.sh
+
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# Start: run migrations + seed + server
+CMD ["sh", "start.sh"]

@@ -4,6 +4,7 @@ import { config, validateEnv } from "./config";
 import { logger } from "./utils/logger";
 import { connectDatabase, registerShutdownHandlers } from "./config/database";
 import { verifyEmailConfig } from "./utils/email";
+import { startSLAMonitor } from "./jobs/sla-monitor";
 
 async function bootstrap() {
   // ── 0. Validation des variables d'environnement ────────────────────────────
@@ -28,6 +29,9 @@ async function bootstrap() {
   app.listen(config.port, () => {
     logger.info(`ITSM Backend running on port ${config.port} [${config.nodeEnv}]`);
     logger.info(`Health check: http://localhost:${config.port}/api/v1/health`);
+    
+    // ── 4.1 Démarrer le SLA Monitor (Cron Job) ──────────────────────────────
+    startSLAMonitor();
   });
 
   // ── 5. Graceful shutdown handlers ──────────────────────────────────────────

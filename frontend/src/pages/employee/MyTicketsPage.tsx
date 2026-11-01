@@ -11,9 +11,11 @@ import FormControl from "@mui/material/FormControl";
 import Chip from "@mui/material/Chip";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../layouts/EmployeeLayout";
-import { getMyTicketsApi, type TicketDTO } from "../../services/tickets.service";
+import { getMyTicketsApi, deleteTicketApi, type TicketDTO } from "../../services/tickets.service";
+import { PATHS, buildPath } from "../../routes/paths";
 
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -58,6 +60,26 @@ function MyTicketsPage() {
       .catch(() => {});
     return () => { cancelled = true; };
   }, []);
+
+  const handleDeleteTicket = async (ticket: TicketDTO) => {
+    // Employees can only delete their own OPEN tickets
+    if (ticket.status !== "OPEN") {
+      alert("You can only delete tickets that are in OPEN status.");
+      return;
+    }
+    
+    if (!confirm(`Are you sure you want to delete ticket ${ticket.ticketNumber}? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      await deleteTicketApi(ticket.id);
+      setTickets((prev) => prev.filter((t) => t.id !== ticket.id));
+      alert(`Ticket ${ticket.ticketNumber} deleted successfully`);
+    } catch (error: any) {
+      alert(error.response?.data?.message || "Failed to delete ticket");
+    }
+  };
 
   const filtered = tickets.filter((t) => {
     const matchSearch = t.subject.toLowerCase().includes(search.toLowerCase()) || t.ticketNumber.toLowerCase().includes(search.toLowerCase());
@@ -120,7 +142,29 @@ function MyTicketsPage() {
             <Chip label={ticket.status.replace(/_/g, " ")} size="small" sx={{ bgcolor: STATUS_COLORS[ticket.status]?.bg, color: STATUS_COLORS[ticket.status]?.text, fontWeight: 600, fontSize: 11, height: 22 }} />
             <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{new Date(ticket.createdAt).toLocaleDateString()}</Typography>
             <Typography sx={{ fontSize: 12, color: "#6B7280" }}>{new Date(ticket.updatedAt).toLocaleDateString()}</Typography>
-            <Typography sx={{ fontSize: 12, color: "#2563EB", cursor: "pointer", fontWeight: 600 }}>View</Typography>
+            <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+              <Typography
+                onClick={() => navigate(buildPath(PATHS.EMPLOYEE_TICKET_DETAIL, { id: ticket.id }))}
+                sx={{ fontSize: 12, color: "#2563EB", cursor: "pointer", fontWeight: 600, "&:hover": { textDecoration: "underline" } }}
+              >
+                View
+              </Typography>
+              {ticket.status === "OPEN" && (
+                <Button
+                  size="small"
+                  onClick={() => handleDeleteTicket(ticket)}
+                  sx={{ 
+                    minWidth: 28, 
+                    p: 0.3, 
+                    color: "#DC2626", 
+                    "&:hover": { bgcolor: "#FEE2E2" } 
+                  }}
+                  title="Delete ticket (only OPEN tickets)"
+                >
+                  <DeleteIcon sx={{ fontSize: 16 }} />
+                </Button>
+              )}
+            </Box>
           </Box>
         ))}
 

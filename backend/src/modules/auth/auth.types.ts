@@ -11,6 +11,7 @@ export interface LoginResponse {
     lastName: string;
     role: string;
     organizationId: string;
+    permissions: string[];
   };
   accessToken: string;
   refreshToken: string;

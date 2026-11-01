@@ -1,8 +1,15 @@
 /**
  * Rôles disponibles dans la plateforme ITSM.
- * Sera complété dans ITSM-004 (Authentication).
+ * Le backend renvoie les rôles en MAJUSCULES (Prisma enum).
  */
 export type UserRole =
+  | "SUPER_ADMIN"
+  | "ADMIN"
+  | "MANAGER"
+  | "DEPT_MANAGER"
+  | "TECHNICIAN"
+  | "USER"
+  // legacy lowercase (kept for compatibility)
   | "super_admin"
   | "admin"
   | "manager"

@@ -58,6 +58,7 @@ export class AuthService {
         lastName: user.lastName,
         role: user.role,
         organizationId: user.organizationId,
+        permissions: [], // TODO: Implement role-based permissions
       },
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
@@ -93,6 +94,7 @@ export class AuthService {
         lastName: user.lastName,
         role: user.role,
         organizationId: user.organizationId,
+        permissions: [], // TODO: Implement role-based permissions
       },
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,

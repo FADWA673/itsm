@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { usersService } from "./users.service";
 import { asyncHandler } from "../../utils/asyncHandler";
 import { ApiError } from "../../utils/ApiError";
-import type { CreateUserRequest } from "./users.types";
+import type { CreateUserRequest, ChangePasswordRequest, UpdateProfileRequest } from "./users.types";
 
 export const getUsers = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) throw new ApiError(401, "Authentication required");
@@ -48,4 +48,31 @@ export const deactivateUser = asyncHandler(async (req: Request, res: Response) =
   const id = req.params["id"] as string;
   const user = await usersService.deactivate(id);
   res.json({ success: true, message: "User deactivated", data: user });
+});
+
+// ─── Profile (self-service) ────────────────────────────────────────────────────
+
+export const getMe = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) throw new ApiError(401, "Authentication required");
+  const profile = await usersService.getMe(req.user.id);
+  res.json({ success: true, message: "Profile retrieved", data: profile });
+});
+
+export const updateMe = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) throw new ApiError(401, "Authentication required");
+  const body = req.body as UpdateProfileRequest;
+  const profile = await usersService.updateMe(req.user.id, body);
+  res.json({ success: true, message: "Profile updated successfully", data: profile });
+});
+
+export const changePassword = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) throw new ApiError(401, "Authentication required");
+  const { currentPassword, newPassword } = req.body as ChangePasswordRequest;
+
+  if (!currentPassword || !newPassword) {
+    throw new ApiError(400, "currentPassword and newPassword are required");
+  }
+
+  await usersService.changePassword(req.user.id, currentPassword, newPassword);
+  res.json({ success: true, message: "Password changed successfully" });
 });

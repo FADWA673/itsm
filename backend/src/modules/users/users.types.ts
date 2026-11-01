@@ -7,6 +7,17 @@ export interface CreateUserRequest {
   organizationId?: string;
 }
 
+export interface UpdateProfileRequest {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface UserResponse {
   id: string;
   email: string;

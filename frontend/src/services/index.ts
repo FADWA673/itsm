@@ -12,3 +12,4 @@
  */
 export * from "./health.service";
 export { apiClient, get, post, put, patch, del } from "./api";
+export * from "./profile.service";

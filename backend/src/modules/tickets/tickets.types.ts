@@ -1,5 +1,6 @@
 export interface CreateTicketRequest {
-  category: string;
+  categoryId?: string; // Nouveau: ID de la catégorie relationnelle (prioritaire)
+  category?: string;   // Ancien: Nom de catégorie (fallback pour compatibilité)
   subject: string;
   description: string;
   priority: string;
@@ -23,4 +24,9 @@ export interface TicketResponse {
   createdAt: string;
   updatedAt: string;
   resolvedAt: string | null;
+  // SLA fields
+  slaDeadline: string | null;
+  slaBreached: boolean;
+  firstResponseAt: string | null;
+  resolutionTime: number | null;
 }

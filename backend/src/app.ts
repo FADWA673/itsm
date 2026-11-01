@@ -21,35 +21,53 @@ export function createApp() {
     })
   );
 
-  // ─── Rate Limiting global ────────────────────────────────────────────────────
-  const limiter = rateLimit({
-    windowMs: config.rateLimit.windowMs,
-    max: config.rateLimit.max,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-      success: false,
-      message: "Too many requests, please try again later.",
-    },
-  });
-  app.use("/api", limiter);
+  // ─── CORS (DOIT ÊTRE AVANT RATE LIMITING) ────────────────────────────────────
+  // Configuration CORS unifiée
+  const corsOptions = config.nodeEnv === "development" 
+    ? {
+        origin: "*", // Autorise TOUTES les origines en dev
+        credentials: false, // Pas de credentials avec origin: "*"
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+        exposedHeaders: ["Content-Disposition"],
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+      }
+    : {
+        origin: config.cors.origin.split(",").map((o: string) => o.trim()),
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+        exposedHeaders: ["Content-Disposition"],
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+      };
 
-  // ─── CORS ────────────────────────────────────────────────────────────────────
-  const allowedOrigins = config.cors.origin.split(",").map((o) => o.trim());
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error(`CORS: origin ${origin} not allowed`));
-        }
+  app.use(cors(corsOptions));
+  
+  if (config.nodeEnv === "development") {
+    console.log("🔓 [CORS] Development mode: All origins allowed");
+  } else {
+    console.log(`🔐 [CORS] Production mode: Allowed origins: ${config.cors.origin}`);
+  }
+
+  // ─── Rate Limiting global (désactivé en dev) ─────────────────────────────────
+  if (config.nodeEnv === "production") {
+    const limiter = rateLimit({
+      windowMs: config.rateLimit.windowMs,
+      max: config.rateLimit.max,
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: {
+        success: false,
+        message: "Too many requests, please try again later.",
       },
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-      credentials: true,
-    })
-  );
+    });
+    app.use("/api", limiter);
+    console.log(`⏱️ [RATE LIMIT] Production: ${config.rateLimit.max} requests per ${config.rateLimit.windowMs}ms`);
+  } else {
+    console.log("⏱️ [RATE LIMIT] Development: Rate limiting disabled");
+  }
 
   // ─── Parsing ─────────────────────────────────────────────────────────────────
   app.use(express.json({ limit: "10mb" }));

@@ -8,3 +8,4 @@
 export { useAuthStore } from "./useAuthStore";
 export { useNotificationStore } from "./useNotificationStore";
 export { useThemeStore } from "./useThemeStore";
+export { useInAppNotificationStore } from "./useInAppNotificationStore";
